@@ -9,8 +9,7 @@
 
 ```php
 new Kama_Cron([
-	'id'            => 'my_cron_jobs',
-	'auto_activate' => true, // false (или удалить) чтобы повесить активацию задачи на register_activation_hook()
+	'id'     => 'my_cron_jobs',
 	'events' => array(
 		// первая задача
 		'wpkama_cron_func' => array(
@@ -66,6 +65,7 @@ register_deactivation_hook( __FILE__, function(){
 
 new Kama_Cron([
 	'id'     => 'my_cron_jobs_2',
+	'auto_activate' => false, // false (или удалить) чтобы повесить активацию задачи на register_activation_hook()
 	'events' => array(
 		// первая задача
 		'wpkama_cron_func_4' => array(
