@@ -90,3 +90,8 @@ function wpkama_cron_func_5(){
 	// операции
 }
 ```
+
+
+## Подробнее
+
+Смотрите в [оригинальной статье](https://wp-kama.ru/id_11098/kama_cron.html) на сайте wp-kama.ru.
