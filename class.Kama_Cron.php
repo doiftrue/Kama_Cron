@@ -3,16 +3,13 @@
 /**
  * Удобное добавление крон задач.
  *
- * Можно использовать параметр 'auto_activate'. Или добавить/удалить задача через:
- * - Kama_Cron::activate()   при активации плагина, при обновлении настроек.
- * - Kama_Cron::deactivate() при деактивации плагина.
- *
- * @version: 0.4
+ * @author Kama (wp-kama.ru)
+ * @version: 0.4.1
  */
 class Kama_Cron {
 
-	static $DEBUG = 0; // в рабочем режиме должно быть 0.
-					   // Для дебага переходим на http://mysite.com/wp-cron.php
+	static $DEBUG = 0; // в рабочем режиме должно быть 0. Для дебага переходим на http://mysite.com/wp-cron.php
+	
 	static $opts;
 
 	protected $id; // внутренняя переменная (для крон задач не используется)
@@ -20,7 +17,7 @@ class Kama_Cron {
 	function __construct( $args ){
 
 		if( empty($args['events']) )
-			wp_die( 'ERROR: Kama_Cron events parametr not set. '. print_r(debug_backtrace(), 1) );
+			wp_die( 'ERROR: Kama_Cron `events` parametr not set. '. print_r(debug_backtrace(), 1) );
 
 		$args_def = [
 			'id' => implode( '--', array_keys($args['events']) ), // уникальный идентификатор по которому потом можно обращаться к настройкам
@@ -50,15 +47,12 @@ class Kama_Cron {
 
 		$args = (object) $args;
 
-		if( ! $this->id = $args->id )
-			wp_die( 'ERROR: Kama_Cron wrong init: id not set. '. print_r($args, 1) );
-
 		self::$opts[ $this->id ] = $args;
 
-		// after 'self::$opts' set
-		add_filter( 'cron_schedules', [ $this, 'add_intervals' ] );
+		// after self::$opts!
+		add_filter( 'cron_schedules', [ $this, 'add_intervals' ] ); 
 
-		// after 'cron_schedules'
+		// after 'cron_schedules'!
 		if( !empty($args->auto_activate) && is_admin() )
 			self::activate( $this->id );
 
@@ -88,7 +82,7 @@ class Kama_Cron {
 	}
 
 	## Добавляет крон задачу.
-	## Вызывается при активации плагина, можно гдето еще например на обновлении настроек.
+	## Вызывается при активации плагина, можно где-то еще, например при обновлении настроек.
 	static function activate( $id = '' ){
 		$opts = $id ? array($id => self::$opts[ $id ]) : self::$opts;
 
@@ -112,9 +106,11 @@ class Kama_Cron {
 		}
 	}
 
-	### Функция по умолчанию для параметра $data['callback']
+	## Функция по умолчанию для параметра $data['callback']
 	static function default_callback(){
-		echo "ERROR: One of Kama_Cron callback function not set.\n\nKama_Cron::\$opts - ". print_r(self::$opts, 1) ."\n\n\n\n". print_r( _get_cron_array(), 1 );
+		echo "ERROR: One of Kama_Cron callback function not set.\n\nKama_Cron::\$opts - ". 
+		     print_r( self::$opts, 1 ) ."\n\n\n\n". 
+		     print_r( _get_cron_array(), 1 );
 	}
 
 }
