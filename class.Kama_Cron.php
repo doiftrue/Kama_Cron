@@ -4,12 +4,12 @@
  * Удобное добавление крон задач.
  *
  * @author Kama (wp-kama.ru)
- * @version: 0.4.1
+ * @version: 0.4.2
  */
 class Kama_Cron {
 
 	static $DEBUG = 0; // в рабочем режиме должно быть 0. Для дебага переходим на http://mysite.com/wp-cron.php
-	
+
 	static $opts;
 
 	protected $id; // внутренняя переменная (для крон задач не используется)
@@ -47,12 +47,14 @@ class Kama_Cron {
 
 		$args = (object) $args;
 
+		$this->id = $args->id;
+
 		self::$opts[ $this->id ] = $args;
 
-		// after self::$opts!
-		add_filter( 'cron_schedules', [ $this, 'add_intervals' ] ); 
+		// after self::$opts
+		add_filter( 'cron_schedules', [ $this, 'add_intervals' ] );
 
-		// after 'cron_schedules'!
+		// after 'cron_schedules'
 		if( !empty($args->auto_activate) && is_admin() )
 			self::activate( $this->id );
 
@@ -108,8 +110,8 @@ class Kama_Cron {
 
 	## Функция по умолчанию для параметра $data['callback']
 	static function default_callback(){
-		echo "ERROR: One of Kama_Cron callback function not set.\n\nKama_Cron::\$opts - ". 
-		     print_r( self::$opts, 1 ) ."\n\n\n\n". 
+		echo "ERROR: One of Kama_Cron callback function not set.\n\nKama_Cron::\$opts = ".
+		     print_r( self::$opts, 1 ) ."\n\n\n\n_get_cron_array() =".
 		     print_r( _get_cron_array(), 1 );
 	}
 
