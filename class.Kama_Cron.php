@@ -3,6 +3,8 @@
 /**
  * Удобное добавление крон задач.
  *
+ * Changelog: https://github.com/doiftrue/Kama_Cron/blob/master/changelog.md
+ *
  * @author Kama (wp-kama.ru)
  * @version: 0.4.2
  */
@@ -116,3 +118,4 @@ class Kama_Cron {
 	}
 
 }
+
