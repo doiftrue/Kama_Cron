@@ -6,7 +6,8 @@
  * Changelog: https://github.com/doiftrue/Kama_Cron/blob/master/changelog.md
  *
  * @author Kama (wp-kama.ru)
- * @version: 0.4.2
+ *
+ * @version 0.4.3
  */
 class Kama_Cron {
 
@@ -16,24 +17,48 @@ class Kama_Cron {
 
 	protected $id; // внутренняя переменная (для крон задач не используется)
 
+	/**
+	 * Kama_Cron constructor.
+	 *
+	 * @param array $args {
+	 *     Args.
+	 *
+	 *     @type string $id             Уникальный идентификатор, по которому потом можно обращаться к настройкам.
+	 *                                  По умолчанию: ключи параметра $events.
+	 *     @type bool   $auto_activate  true - автоматически создаст указанное событие, при посещении админ-панели.
+	 *                                  В этом случае отдельно вызывать метод activate() не нужно.
+	 *     @type array  $events         {
+	 *        Массив событий, которые нужно добавить в крон. Ключ элемента будет использоваться в хуке крона.
+	 *        Значение элемента - это массив параметров события:
+	 *
+	 *        @type callable  $callback       Название функции крон-задачи.
+	 *        @type mixed     $args           Какие параметры передать в фукнцию крон-задачи.
+	 *        @type string    $interval_name  'half_an_hover' можно указать уже имеющийся интервал: hourly, twicedaily, daily.
+	 *        @type int       $interval_sec   HOUR_IN_SECONDS / 2 (не нужно указывать, если задан уже имеющийся интервал).
+	 *        @type string    $interval_desc  'Каждые пол часа' (не нужно указывать, если задан уже имеющийся интервал).
+	 *        @type int       $start_time     С какого момента начать событие. 0 - time().
+	 *     }
+	 *
+	 * }
+	 */
 	function __construct( $args ){
 
 		if( empty($args['events']) )
-			wp_die( 'ERROR: Kama_Cron `events` parametr not set. '. print_r(debug_backtrace(), 1) );
+			wp_die( 'ERROR: Kama_Cron `events` parameter not set. '. print_r(debug_backtrace(), 1) );
 
 		$args_def = [
-			'id' => implode( '--', array_keys($args['events']) ), // уникальный идентификатор по которому потом можно обращаться к настройкам
+			'id' => implode( '--', array_keys($args['events']) ),
 
-			'auto_activate' => true, // true - автоматически создаст указанное событие, при посещении админ-панели.
-									 // в этом случае отдельно вызывать метод activate() не нужно.
+			'auto_activate' => true,
+
 			'events' => [
 				'hook_name' => [
-					'start_time'    => 0,       // с какого момента начать событие. 0 - time()
-					'args'          => array(), // какие параметры передать в фукнцию крон-задачи
-					'callback'      => [ __CLASS__, 'default_callback' ], // название функции крон-задачи
-					'interval_name' => '',      // 'half_an_hover' можно указать уже имеющийся интервал: hourly, twicedaily, daily
-					'interval_sec'  => 0,       // HOUR_IN_SECONDS / 2 (не нужно указывать, если задан уже имеющийся интервал)
-					'interval_desc' => '',      // 'Каждые пол часа' (не нужно указывать, если задан уже имеющийся интервал)
+					'callback'      => [ __CLASS__, 'default_callback' ],
+					'args'          => array(),
+					'interval_name' => '',
+					'interval_sec'  => 0,
+					'interval_desc' => '',
+					'start_time'    => 0,
 				],
 			],
 		];
@@ -72,11 +97,28 @@ class Kama_Cron {
 	}
 
 	function add_intervals( $schedules ){
+
 		foreach( self::$opts[ $this->id ]->events as $hook => $data ){
-			if( ! $data['interval_sec'] || isset($schedules[ $data['interval_name'] ]) )
+			$_name = $data['interval_name'];
+
+			if( isset($schedules[ $_name ]) || in_array($_name, [ 'hourly','twicedaily','daily' ]) )
 				continue;
 
-			$schedules[ $data['interval_name'] ] = array(
+			// allow set only `interval_name` parameter like: 10_min, 2_hours, 5_days, 2_month
+			if( empty($data['interval_sec']) ){
+
+				if( preg_match('/(\d+)[_-](min|hour|day|month)s?/', $_name, $mm) ){
+					$min   = 60;
+					$hour  = $min * 60;
+					$day   = $hour * 24;
+					$month = $day * 30;
+					$data['interval_sec'] = $mm[1] * ${$mm[2]};
+				}
+				else
+					wp_die( 'ERROR: Kama_Cron required event parameter `interval_sec` not set. '. print_r(debug_backtrace(), 1) );
+			}
+
+			$schedules[ $_name ] = array(
 				'interval' => $data['interval_sec'],
 				'display'  => $data['interval_desc'],
 			);
