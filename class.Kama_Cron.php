@@ -15,10 +15,10 @@ class Kama_Cron {
 
 	static $opts;
 
-	protected $id; // внутренняя переменная (для крон задач не используется)
+	protected $id;     // внутренняя переменная (для крон задач не используется)
 
 	/**
-	 * Kama_Cron constructor.
+	 * Конструктор.
 	 *
 	 * @param array $args {
 	 *     Args.
@@ -29,14 +29,18 @@ class Kama_Cron {
 	 *                                  В этом случае отдельно вызывать метод activate() не нужно.
 	 *     @type array  $events         {
 	 *        Массив событий, которые нужно добавить в крон. Ключ элемента будет использоваться в хуке крона.
-	 *        Значение элемента - это массив параметров события:
+	 *        Значение элемента - это массив параметров события, который может содержать следующие ключи:
 	 *
 	 *        @type callable  $callback       Название функции крон-задачи.
 	 *        @type mixed     $args           Какие параметры передать в фукнцию крон-задачи.
-	 *        @type string    $interval_name  'half_an_hover' можно указать уже имеющийся интервал: hourly, twicedaily, daily.
-	 *        @type int       $interval_sec   HOUR_IN_SECONDS / 2 (не нужно указывать, если задан уже имеющийся интервал).
-	 *        @type string    $interval_desc  'Каждые пол часа' (не нужно указывать, если задан уже имеющийся интервал).
-	 *        @type int       $start_time     С какого момента начать событие. 0 - time().
+	 *        @type string    $interval_name  Название интервала, например: 'half_an_hover'.
+	 *                                        Можно указать название вида N_(min|hour|day|month): 10_min, 2_hours, 5_days, 2_month,
+	 *                                        тогда время интервала будет выставлено соотвествующеее.
+	 *                                        Можно указать уже имеющийся интервал WP: hourly, twicedaily, daily,
+	 *                                        тогда время интервала выставлять необзательно.
+	 *        @type int       $interval_sec   Время интервала, например HOUR_IN_SECONDS / 2. Не указывается при hourly, twicedaily, daily.
+	 *        @type string    $interval_desc  Описание интервала, например 'Каждые пол часа'. Не указывается при hourly, twicedaily, daily.
+	 *        @type int       $start_time     UNIX - time() метка времени. С какого момента начать событие. По умолчанию: сразу.
 	 *     }
 	 *
 	 * }
@@ -90,7 +94,8 @@ class Kama_Cron {
 
 		if( self::$DEBUG && defined('DOING_CRON') && DOING_CRON ){
 			add_action( 'wp_loaded', function(){
-				echo 'Current time: '. time() ."\n\n\n".'Existing Intervals:'."\n". print_r( wp_get_schedules(), 1 ) ."\n\n\n". print_r( _get_cron_array(), 1 );
+				echo 'Current time: '. time() ."\n\n\n".'Existing Intervals:'."\n".
+				     print_r( wp_get_schedules(), 1 ) ."\n\n\n". print_r( _get_cron_array(), 1 );
 			} );
 		}
 
