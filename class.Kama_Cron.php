@@ -1,24 +1,24 @@
 <?php
 
 /**
- * Удобное добавление крон задач.
+ * Convenient way to add cron tasks in WordPress.
  *
  * Changelog: https://github.com/doiftrue/Kama_Cron/blob/master/changelog.md
  *
  * @author Kama (wp-kama.ru)
  *
- * @version 0.4.3
+ * @version 0.4.4
  */
 class Kama_Cron {
 
-	static $DEBUG = 0; // в рабочем режиме должно быть 0. Для дебага переходим на http://mysite.com/wp-cron.php
+	static $DEBUG = 0; // must be 0 on production. For debug go to: http://mysite.com/wp-cron.php
 
 	static $opts;
 
-	protected $id;     // внутренняя переменная (для крон задач не используется)
+	protected $id; // internal (not used for cron)
 
 	/**
-	 * Конструктор.
+	 * Constructor.
 	 *
 	 * @param array $args {
 	 *     Args.
@@ -38,9 +38,11 @@ class Kama_Cron {
 	 *                                        тогда время интервала будет выставлено соотвествующеее.
 	 *                                        Можно указать уже имеющийся интервал WP: hourly, twicedaily, daily,
 	 *                                        тогда время интервала выставлять необзательно.
-	 *        @type int       $interval_sec   Время интервала, например HOUR_IN_SECONDS / 2. Не указывается при hourly, twicedaily, daily.
-	 *        @type string    $interval_desc  Описание интервала, например 'Каждые пол часа'. Не указывается при hourly, twicedaily, daily.
-	 *        @type int       $start_time     UNIX - time() метка времени. С какого момента начать событие. По умолчанию: сразу.
+	 *        @type int       $interval_sec   Время интервала, например HOUR_IN_SECONDS / 2.  Не нужно указывать, когда
+	 *                                        $interval_name = N_(min|hour|day|month), hourly, twicedaily, daily.
+	 *        @type string    $interval_desc  Описание интервала, например 'Каждые пол часа'. Не нужно указывать, когда
+	 *                                        $interval_name = hourly, twicedaily, daily.
+	 *        @type int       $start_time     UNIX - time() метка времени. С какого момента начать событие. По умолчанию: time().
 	 *     }
 	 *
 	 * }
@@ -58,7 +60,7 @@ class Kama_Cron {
 			'events' => [
 				'hook_name' => [
 					'callback'      => [ __CLASS__, 'default_callback' ],
-					'args'          => array(),
+					'args'          => [],
 					'interval_name' => '',
 					'interval_sec'  => 0,
 					'interval_desc' => '',
@@ -70,7 +72,7 @@ class Kama_Cron {
 		$event_def = $args_def['events']['hook_name'];
 		unset( $args_def['events'] );
 
-		// дополним параметами класса по умолчанию
+		// complete parameters using defaults
 		$args = array_merge( $args_def, $args );
 		foreach( $args['events'] as & $events )
 			$events = array_merge( $event_def, $events );
@@ -123,19 +125,19 @@ class Kama_Cron {
 					wp_die( 'ERROR: Kama_Cron required event parameter `interval_sec` not set. '. print_r(debug_backtrace(), 1) );
 			}
 
-			$schedules[ $_name ] = array(
+			$schedules[ $_name ] = [
 				'interval' => $data['interval_sec'],
 				'display'  => $data['interval_desc'],
-			);
+			];
 		}
 
 		return $schedules;
 	}
 
-	## Добавляет крон задачу.
-	## Вызывается при активации плагина, можно где-то еще, например при обновлении настроек.
+	# Add cron task.
+	# Вызывается при активации плагина, можно где-то еще, например при обновлении настроек.
 	static function activate( $id = '' ){
-		$opts = $id ? array($id => self::$opts[ $id ]) : self::$opts;
+		$opts = $id ? [ $id => self::$opts[ $id ] ] : self::$opts;
 
 		foreach( $opts as $opt ){
 			foreach( $opt->events as $hook => $data ){
@@ -146,10 +148,10 @@ class Kama_Cron {
 		}
 	}
 
-	## Удаляет крон задачу.
-	## Вызывается при дезактивации плагина.
+	# Removes cron task.
+	# Вызывается при дезактивации плагина.
 	static function deactivate( $id = '' ){
-		$opts = $id ? array($id => self::$opts[ $id ]) : self::$opts;
+		$opts = $id ? [ $id => self::$opts[ $id ] ] : self::$opts;
 
 		foreach( $opts as $opt ){
 			foreach( $opt->events as $hook => $data )
@@ -157,7 +159,7 @@ class Kama_Cron {
 		}
 	}
 
-	## Функция по умолчанию для параметра $data['callback']
+	# Default function for `$data['callback']` parameter.
 	static function default_callback(){
 		echo "ERROR: One of Kama_Cron callback function not set.\n\nKama_Cron::\$opts = ".
 		     print_r( self::$opts, 1 ) ."\n\n\n\n_get_cron_array() =".
