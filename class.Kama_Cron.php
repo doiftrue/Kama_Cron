@@ -11,11 +11,15 @@
  */
 class Kama_Cron {
 
-	static $DEBUG = 0; // must be 0 on production. For debug go to: http://mysite.com/wp-cron.php
+	// must be 0 on production.
+	// For debug go to: http://site.com/wp-cron.php
+	static $DEBUG = false;
 
+	// internal (Collects every cron options called with this class).
 	static $opts;
 
-	protected $id; // internal (not used for cron)
+	// internal id for opts (Not used for cron).
+	protected $id;
 
 	/**
 	 * Constructor.
@@ -168,11 +172,11 @@ class Kama_Cron {
 	 * @param string $id
 	 */
 	static function deactivate( $id = '' ){
-		
+
 		$opts = $id ? [ $id => self::$opts[ $id ] ] : self::$opts;
 
 		foreach( $opts as $opt ){
-			
+
 			foreach( $opt->events as $hook => $data ){
 				wp_clear_scheduled_hook( $hook, $data['args'] );
 			}
@@ -180,7 +184,7 @@ class Kama_Cron {
 	}
 
 	static function default_callback(){
-		
+
 		echo "ERROR: One of Kama_Cron callback function not set.\n\nKama_Cron::\$opts = " .
 		     print_r( self::$opts, 1 ) . "\n\n\n\n_get_cron_array() =" .
 		     print_r( _get_cron_array(), 1 );
