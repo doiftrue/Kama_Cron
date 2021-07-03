@@ -52,7 +52,7 @@
  *
  * @author Kama (wp-kama.com)
  *
- * @version 0.4.6
+ * @version 0.4.7
  */
 class Kama_Cron {
 
