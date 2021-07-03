@@ -77,7 +77,7 @@ class Kama_Cron {
 	 *                                        then the number will be taken as interval time.
 	 *                                        You can specify an existing WP interval: hourly, twicedaily, daily,
 	 *                                        then the interval time should not be set.
-	 *                                        Omite this parameter or set to `once` or `single` to register single cron job.
+	 *                                        Omite this parameter to register single cron job.
 	 *        @type int       $interval_sec   Interval time, for example HOUR_IN_SECONDS / 2.
 	 *                                        You don't need to specify this papameter when $interval_name one of:
 	 *                                        N_(min|hour|day|month), hourly, twicedaily, daily.
@@ -195,18 +195,17 @@ class Kama_Cron {
 		foreach( $opts as $opt ){
 
 			foreach( $opt->events as $hook => $data ){
-
-				if( ! wp_next_scheduled( $hook, $data['args'] ) ){
-
-					$start_time = $data['start_time'] ?: time();
-					$interval_name = $data['interval_name'];
-					in_array( $interval_name, [ 'once', 'single' ], 1 ) && $interval_name = false;
-
-					if( $interval_name )
-						wp_schedule_event( $start_time, $interval_name, $hook, $data['args'] );
-					else
-						wp_schedule_single_event( $start_time, $hook, $data['args'] );
+				
+				if( wp_next_scheduled( $hook, $data['args'] ) )
+					continue;
+					
+				if( $data['interval_name'] ){
+					wp_schedule_event( $data['start_time'] ?: time(), $data['interval_name'], $hook, $data['args'] );
 				}
+				elseif( $data['start_time'] > time() ){
+					wp_schedule_single_event( $data['start_time'], $hook, $data['args'] );
+				}					
+				
 			}
 		}
 	}
