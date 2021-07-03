@@ -7,6 +7,21 @@
  *
  * ```
  * new Kama_Cron( [
+ *     'wpkama_cron_func' => [
+ *         'callback'      => 'wpkama_cron_func', // PHP function to run on job
+ *         'interval_name' => '10_min',           // you can set already registered interval: hourly, twicedaily, daily
+ *         'interval_desc' => 'Every 10 min',     // no need if already registered interval is set.
+ *     ],
+ * ] );
+ *
+ * new Kama_Cron( [
+ *     'single_job' => [
+ *         'callback' => 'single_job_func',
+ *         'start_time' => strtotime( '2021-06-05' ),
+ *     ],
+ * ] );
+ *
+ * new Kama_Cron( [
  *     'id'     => 'my_cron_jobs', // not required param
  *     'events' => [
  *         // first task
@@ -27,10 +42,6 @@
  *         'wpkama_cron_func_3' => [
  *             'callback'      => 'wpkama_cron_func_3',
  *             'interval_name' => 'hourly', // this is already a known WP interval
- *         ],
- *         // single task
- *         'wpkama_cron_func_3' => [
- *             'callback'      => 'wpkama_cron_func_4',
  *         ],
  *     ],
  * ] );
@@ -153,11 +164,11 @@ class Kama_Cron {
 	public function add_intervals( $schedules ){
 
 		foreach( self::$opts[ $this->id ]->events as $data ){
-			
+
 			// it is a single event.
 			if( ! $interval_name = $data['interval_name'] )
 				continue;
-			
+
 			if( isset( $schedules[ $interval_name ] ) || in_array( $interval_name, [ 'hourly', 'twicedaily', 'daily' ] ) ){
 				continue;
 			}
@@ -170,7 +181,7 @@ class Kama_Cron {
 					$hour = $min * 60;
 					$day = $hour * 24;
 					$month = $day * 30;
-					
+
 					$data['interval_sec'] = $mm[1] * ${$mm[2]};
 				}
 				else {
@@ -208,8 +219,13 @@ class Kama_Cron {
 					wp_schedule_event( $data['start_time'] ?: time(), $data['interval_name'], $hook, $data['args'] );
 				}
 				// single event
-				elseif( $data['start_time'] > time() ){
-					wp_schedule_single_event( $data['start_time'], $hook, $data['args'] );
+				else {
+					if( ! $data['start_time'] ){
+						trigger_error( __CLASS__ . ' ERROR: Start time not specified for single event' );
+					}
+					elseif( $data['start_time'] > time() ){
+						wp_schedule_single_event( $data['start_time'], $hook, $data['args'] );
+					}
 				}
 
 			}
