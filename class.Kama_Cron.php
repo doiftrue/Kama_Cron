@@ -7,7 +7,7 @@
  *
  * @author Kama (wp-kama.com)
  *
- * @version 0.4.5
+ * @version 0.4.6
  */
 class Kama_Cron {
 
@@ -38,14 +38,18 @@ class Kama_Cron {
 	 *        @type callable  $callback       The name of the crown task function.
 	 *        @type mixed     $args           What parameters should be passed to the crown task function.
 	 *        @type string    $interval_name  The name of the interval, for example: 'half_an_hover'.
-	 *                                        You can specify such name `N_(min|hour|day|month)`: 10_min, 2_hours, 5_days, 2_month,
+	 *                                        You can specify the name in the following format:
+	 *                                        `N_(min|hour|day|month)` — 10_min, 2_hours, 5_days, 2_month,
 	 *                                        then the number will be taken as interval time.
 	 *                                        You can specify an existing WP interval: hourly, twicedaily, daily,
 	 *                                        then the interval time should not be set.
-	 *        @type int       $interval_sec   Interval time, for example HOUR_IN_SECONDS / 2. You don't need to specify when
-	 *                                        $interval_name = N_(min|hour|day|month), hourly, twicedaily, daily.
-	 *        @type string    $interval_desc  Description of the interval, for example, 'Every half hour'. You don't need to specify when
-	 *                                        $interval_name = hourly, twicedaily, daily.
+	 *                                        Omite this parameter or set to `once` or `single` to register single cron job.
+	 *        @type int       $interval_sec   Interval time, for example HOUR_IN_SECONDS / 2.
+	 *                                        You don't need to specify this papameter when $interval_name one of:
+	 *                                        N_(min|hour|day|month), hourly, twicedaily, daily.
+	 *        @type string    $interval_desc  Description of the interval, for example, 'Every half hour'.
+	 *                                        You don't need to specify this param when $interval_name one of:
+	 *                                        hourly, twicedaily, daily.
 	 *        @type int       $start_time     UNIX timestamp. When to start the event. By default: time().
 	 *     }
 	 *
@@ -159,7 +163,15 @@ class Kama_Cron {
 			foreach( $opt->events as $hook => $data ){
 
 				if( ! wp_next_scheduled( $hook, $data['args'] ) ){
-					wp_schedule_event( ( $data['start_time'] ?: time() ), $data['interval_name'], $hook, $data['args'] );
+
+					$start_time = $data['start_time'] ?: time();
+					$interval_name = $data['interval_name'];
+					in_array( $interval_name, [ 'once', 'single' ], 1 ) && $interval_name = false;
+
+					if( $interval_name )
+						wp_schedule_event( $start_time, $interval_name, $hook, $data['args'] );
+					else
+						wp_schedule_single_event( $start_time, $hook, $data['args'] );
 				}
 			}
 		}
