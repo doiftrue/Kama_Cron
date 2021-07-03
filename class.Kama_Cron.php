@@ -3,6 +3,40 @@
 /**
  * Convenient way to add cron tasks in WordPress.
  *
+ * Usage Example:
+ *
+ * ```
+ * new Kama_Cron( [
+ *     'id'     => 'my_cron_jobs', // not required param
+ *     'events' => [
+ *         // first task
+ *         'wpkama_cron_func' => [
+ *             'callback'      => 'wpkama_cron_func', // PHP function to run on job
+ *             'interval_name' => '10_min',           // you can set already registered interval: hourly, twicedaily, daily
+ *             'interval_desc' => 'Every 10 min',     // no need if already registered interval is set.
+ *         ],
+ *         // second task
+ *         'wpkama_cron_func_2' => [
+ *             'callback'      => 'wpkama_cron_func_2',
+ *             'start_time'    => time() + DAY_IN_SECONDS, // start in 1 day
+ *             'interval_name' => 'two_hours',
+ *             'interval_sec'  => HOUR_IN_SECONDS * 2,
+ *             'interval_desc' => 'Every 2 hours',
+ *         ],
+ *         // third task
+ *         'wpkama_cron_func_3' => [
+ *             'callback'      => 'wpkama_cron_func_3',
+ *             'interval_name' => 'hourly', // this is already a known WP interval
+ *         ],
+ *         // single task
+ *         'wpkama_cron_func_3' => [
+ *             'callback'      => 'wpkama_cron_func_4',
+ *         ],
+ *     ],
+ * ] );
+ * ```
+ *
+ *
  * Changelog: https://github.com/doiftrue/Kama_Cron/blob/master/changelog.md
  *
  * @author Kama (wp-kama.com)
