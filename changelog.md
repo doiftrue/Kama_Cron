@@ -1,5 +1,6 @@
 0.4.6
 - Single event registration support.
+- Passing arguments simplified method.
 
 0.4.3 (2018-12-27)
 - ADD: Проверка обязательного параметра `interval_sec`. Класс выведет wp_die ошибку, если он вызыван неправильно.
