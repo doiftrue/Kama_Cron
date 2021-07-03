@@ -92,7 +92,7 @@ class Kama_Cron {
 	public function __construct( $args ){
 
 		if( empty( $args['events'] ) ){
-			wp_die( 'ERROR: Kama_Cron `events` parameter not set. ' . print_r( debug_backtrace(), 1 ) );
+			$args = [ 'events' => $args ];
 		}
 
 		$args_def = [
