@@ -1,5 +1,6 @@
 <?php
 
+
 /**
  * Convenient way to add cron tasks in WordPress.
  *
@@ -52,7 +53,7 @@
  *
  * @author Kama (wp-kama.com)
  *
- * @version 0.4.7
+ * @version 0.4.8
  */
 class Kama_Cron {
 
@@ -144,7 +145,7 @@ class Kama_Cron {
 		add_filter( 'cron_schedules', [ $this, 'add_intervals' ] );
 
 		// after 'cron_schedules'
-		if( $rg->auto_activate && is_admin() ){
+		if( $rg->auto_activate && ( is_admin() || defined( 'WP_CLI' ) || defined( 'DOING_CRON' ) ) ){
 			self::activate( $this->id );
 		}
 
@@ -152,7 +153,7 @@ class Kama_Cron {
 			add_action( $hook, $data['callback'] );
 		}
 
-		if( self::$DEBUG && defined( 'DOING_CRON' ) && DOING_CRON ){
+		if( self::$DEBUG && defined( 'DOING_CRON' ) ){
 
 			add_action( 'wp_loaded', function(){
 				echo 'Current time: ' . time() . "\n\n\n" . 'Existing Intervals:' . "\n" .
