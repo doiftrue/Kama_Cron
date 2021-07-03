@@ -117,26 +117,27 @@ class Kama_Cron {
 
 		// complete parameters using defaults
 		$args = array_merge( $args_def, $args );
+		// complete `events` elements
 		foreach( $args['events'] as & $events ){
 			$events = array_merge( $event_def, $events );
 		}
 		unset( $events );
 
-		$args = (object) $args;
+		$rg = (object) $args;
 
-		$this->id = $args->id;
+		$this->id = $rg->id;
 
-		self::$opts[ $this->id ] = $args;
+		self::$opts[ $this->id ] = $rg;
 
 		// after self::$opts
 		add_filter( 'cron_schedules', [ $this, 'add_intervals' ] );
 
 		// after 'cron_schedules'
-		if( ! empty( $args->auto_activate ) && is_admin() ){
+		if( $rg->auto_activate && is_admin() ){
 			self::activate( $this->id );
 		}
 
-		foreach( $args->events as $hook => $data ){
+		foreach( $rg->events as $hook => $data ){
 			add_action( $hook, $data['callback'] );
 		}
 
@@ -151,29 +152,33 @@ class Kama_Cron {
 
 	public function add_intervals( $schedules ){
 
-		foreach( self::$opts[ $this->id ]->events as $hook => $data ){
-			$_name = $data['interval_name'];
-
-			if( isset( $schedules[ $_name ] ) || in_array( $_name, [ 'hourly', 'twicedaily', 'daily' ] ) ){
+		foreach( self::$opts[ $this->id ]->events as $data ){
+			
+			// it is a single event.
+			if( ! $interval_name = $data['interval_name'] )
+				continue;
+			
+			if( isset( $schedules[ $interval_name ] ) || in_array( $interval_name, [ 'hourly', 'twicedaily', 'daily' ] ) ){
 				continue;
 			}
 
 			// allow set only `interval_name` parameter like: 10_min, 2_hours, 5_days, 2_month
-			if( empty( $data['interval_sec'] ) ){
+			if( ! $data['interval_sec'] ){
 
-				if( preg_match( '/(\d+)[_-](min|hour|day|month)s?/', $_name, $mm ) ){
+				if( preg_match( '/(\d+)[_-](min|hour|day|month)s?/', $interval_name, $mm ) ){
 					$min = 60;
 					$hour = $min * 60;
 					$day = $hour * 24;
 					$month = $day * 30;
+					
 					$data['interval_sec'] = $mm[1] * ${$mm[2]};
 				}
-				else{
+				else {
 					wp_die( 'ERROR: Kama_Cron required event parameter `interval_sec` not set. ' . print_r( debug_backtrace(), 1 ) );
 				}
 			}
 
-			$schedules[ $_name ] = [
+			$schedules[ $interval_name ] = [
 				'interval' => $data['interval_sec'],
 				'display'  => $data['interval_desc'],
 			];
@@ -195,17 +200,18 @@ class Kama_Cron {
 		foreach( $opts as $opt ){
 
 			foreach( $opt->events as $hook => $data ){
-				
+
 				if( wp_next_scheduled( $hook, $data['args'] ) )
 					continue;
-					
+
 				if( $data['interval_name'] ){
 					wp_schedule_event( $data['start_time'] ?: time(), $data['interval_name'], $hook, $data['args'] );
 				}
+				// single event
 				elseif( $data['start_time'] > time() ){
 					wp_schedule_single_event( $data['start_time'], $hook, $data['args'] );
-				}					
-				
+				}
+
 			}
 		}
 	}
