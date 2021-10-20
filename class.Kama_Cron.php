@@ -1,6 +1,5 @@
 <?php
 
-
 /**
  * Convenient way to add cron tasks in WordPress.
  *
@@ -48,23 +47,30 @@
  * ] );
  * ```
  *
- *
- * Changelog: https://github.com/doiftrue/Kama_Cron/blob/master/changelog.md
+ * @changelog: https://github.com/doiftrue/Kama_Cron/blob/master/changelog.md
  *
  * @author Kama (wp-kama.com)
  *
- * @version 0.4.8
+ * @version 0.4.9
  */
 class Kama_Cron {
 
 	// must be 0 on production.
 	// For debug go to: http://site.com/wp-cron.php
-	static $DEBUG = false;
+	const DEBUG = false;
 
-	// internal (Collects every cron options called with this class).
-	static $opts;
+	/**
+	 * Collects every cron options called with this class. Internal.
+	 * 
+	 * @var array
+	 */
+	static $opts = [];
 
-	// internal id for opts (Not used for cron).
+	/**
+	 * ID for opts (Not uses for cron).  Internal.
+	 * 
+	 * @var string
+	 */
 	protected $id;
 
 	/**
@@ -153,9 +159,10 @@ class Kama_Cron {
 			add_action( $hook, $data['callback'] );
 		}
 
-		if( self::$DEBUG && defined( 'DOING_CRON' ) ){
+		if( self::DEBUG && defined( 'DOING_CRON' ) ){
 
 			add_action( 'wp_loaded', function(){
+				
 				echo 'Current time: ' . time() . "\n\n\n" . 'Existing Intervals:' . "\n" .
 				     print_r( wp_get_schedules(), 1 ) . "\n\n\n" . print_r( _get_cron_array(), 1 );
 			} );
@@ -165,12 +172,17 @@ class Kama_Cron {
 	public function add_intervals( $schedules ){
 
 		foreach( self::$opts[ $this->id ]->events as $data ){
-
-			// it is a single event.
-			if( ! $interval_name = $data['interval_name'] )
-				continue;
-
-			if( isset( $schedules[ $interval_name ] ) || in_array( $interval_name, [ 'hourly', 'twicedaily', 'daily' ] ) ){
+			
+			$interval_name = $data['interval_name'];
+			
+			if(
+				// it is a single event.
+				! $interval_name
+				// already exists
+				|| isset( $schedules[ $interval_name ] )
+				// internal WP intervals
+				|| in_array( $interval_name, [ 'hourly', 'twicedaily', 'daily' ] ) 
+			){
 				continue;
 			}
 
@@ -183,9 +195,10 @@ class Kama_Cron {
 					$day = $hour * 24;
 					$month = $day * 30;
 
-					$data['interval_sec'] = $mm[1] * ${$mm[2]};
+					$data['interval_sec'] = $mm[1] * ${ $mm[2] };
 				}
 				else {
+					/** @noinspection ForgottenDebugOutputInspection */
 					wp_die( 'ERROR: Kama_Cron required event parameter `interval_sec` not set. ' . print_r( debug_backtrace(), 1 ) );
 				}
 			}
@@ -213,20 +226,19 @@ class Kama_Cron {
 
 			foreach( $opt->events as $hook => $data ){
 
-				if( wp_next_scheduled( $hook, $data['args'] ) )
+				if( wp_next_scheduled( $hook, $data['args'] ) ){
 					continue;
+				}
 
 				if( $data['interval_name'] ){
 					wp_schedule_event( $data['start_time'] ?: time(), $data['interval_name'], $hook, $data['args'] );
 				}
 				// single event
-				else {
-					if( ! $data['start_time'] ){
-						trigger_error( __CLASS__ . ' ERROR: Start time not specified for single event' );
-					}
-					elseif( $data['start_time'] > time() ){
-						wp_schedule_single_event( $data['start_time'], $hook, $data['args'] );
-					}
+				elseif( ! $data['start_time'] ){
+					trigger_error( __CLASS__ . ' ERROR: Start time not specified for single event' );
+				}
+				elseif( $data['start_time'] > time() ){
+					wp_schedule_single_event( $data['start_time'], $hook, $data['args'] );
 				}
 
 			}
@@ -259,4 +271,6 @@ class Kama_Cron {
 	}
 
 }
+
+
 
