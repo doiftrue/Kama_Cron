@@ -51,7 +51,7 @@
  *
  * @author Kama (wp-kama.com)
  *
- * @version 0.4.9
+ * @version 0.4.10
  */
 class Kama_Cron {
 
@@ -61,14 +61,14 @@ class Kama_Cron {
 
 	/**
 	 * Collects every cron options called with this class. Internal.
-	 * 
+	 *
 	 * @var array
 	 */
 	static $opts = [];
 
 	/**
 	 * ID for opts (Not uses for cron).  Internal.
-	 * 
+	 *
 	 * @var string
 	 */
 	protected $id;
@@ -162,7 +162,7 @@ class Kama_Cron {
 		if( self::DEBUG && defined( 'DOING_CRON' ) ){
 
 			add_action( 'wp_loaded', function(){
-				
+
 				echo 'Current time: ' . time() . "\n\n\n" . 'Existing Intervals:' . "\n" .
 				     print_r( wp_get_schedules(), 1 ) . "\n\n\n" . print_r( _get_cron_array(), 1 );
 			} );
@@ -172,16 +172,16 @@ class Kama_Cron {
 	public function add_intervals( $schedules ){
 
 		foreach( self::$opts[ $this->id ]->events as $data ){
-			
+
 			$interval_name = $data['interval_name'];
-			
+
 			if(
 				// it is a single event.
 				! $interval_name
 				// already exists
 				|| isset( $schedules[ $interval_name ] )
 				// internal WP intervals
-				|| in_array( $interval_name, [ 'hourly', 'twicedaily', 'daily' ] ) 
+				|| in_array( $interval_name, [ 'hourly', 'twicedaily', 'daily' ] )
 			){
 				continue;
 			}
@@ -205,7 +205,7 @@ class Kama_Cron {
 
 			$schedules[ $interval_name ] = [
 				'interval' => $data['interval_sec'],
-				'display'  => $data['interval_desc'],
+				'display'  => $data['interval_desc'] ?: $data['interval_name'],
 			];
 		}
 
@@ -271,6 +271,4 @@ class Kama_Cron {
 	}
 
 }
-
-
 
