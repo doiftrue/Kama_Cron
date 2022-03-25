@@ -87,8 +87,8 @@ class Kama_Cron {
 	 *        An array of events to add to the crown. The element key will be used in the cron hook.
 	 *        The element value is an array of event parameters that can contain the following keys:
 	 *
-	 *        @type callable  $callback       The name of the crown task function.
-	 *        @type mixed     $args           What parameters should be passed to the crown task function.
+	 *        @type callable  $callback       The name of the cron task function.
+	 *        @type mixed     $args           What parameters should be passed to the cron task function.
 	 *        @type string    $interval_name  The name of the interval, for example: 'half_an_hover'.
 	 *                                        You can specify the name in the following format:
 	 *                                        `N_(min|hour|day|month)` — 10_min, 2_hours, 5_days, 2_month,
