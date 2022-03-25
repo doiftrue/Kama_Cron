@@ -51,20 +51,20 @@
  *
  * @author Kama (wp-kama.com)
  *
- * @version 0.4.10
+ * @version 0.4.11
  */
 class Kama_Cron {
 
 	// must be 0 on production.
 	// For debug go to: http://site.com/wp-cron.php
-	const DEBUG = false;
+	public const DEBUG = false;
 
 	/**
 	 * Collects every cron options called with this class. Internal.
 	 *
 	 * @var array
 	 */
-	static $opts = [];
+	public static $opts = [];
 
 	/**
 	 * ID for opts (Not uses for cron).  Internal.
@@ -82,7 +82,7 @@ class Kama_Cron {
 	 *     @type string $id             A unique identifier that can then be used to access the settings.
 	 *                                  Default: keys of the $events parameter.
 	 *     @type bool   $auto_activate  true - automatically creates the specified event when visiting the admin panel.
-	 *                                  In this case, you do not need to call the activate() method separately.
+	 *                                  In this case, you do not need to call {@see self::activate} method separately.
 	 *     @type array  $events         {
 	 *        An array of events to add to the crown. The element key will be used in the cron hook.
 	 *        The element value is an array of event parameters that can contain the following keys:
@@ -102,7 +102,7 @@ class Kama_Cron {
 	 *        @type string    $interval_desc  Description of the interval, for example, 'Every half hour'.
 	 *                                        You don't need to specify this param when $interval_name one of:
 	 *                                        hourly, twicedaily, daily.
-	 *        @type int       $start_time     UNIX timestamp. When to start the event. By default: time().
+	 *        @type int       $start_time     UNIX timestamp. When to start the event. Default: time().
 	 *     }
 	 *
 	 * }
@@ -135,11 +135,12 @@ class Kama_Cron {
 
 		// complete parameters using defaults
 		$args = array_merge( $args_def, $args );
+
 		// complete `events` elements
-		foreach( $args['events'] as & $events ){
-			$events = array_merge( $event_def, $events );
+		foreach( $args['events'] as & $_event ){
+			$_event += $event_def;
 		}
-		unset( $events );
+		unset( $_event );
 
 		$rg = (object) $args;
 
@@ -151,22 +152,17 @@ class Kama_Cron {
 		add_filter( 'cron_schedules', [ $this, 'add_intervals' ] );
 
 		// after 'cron_schedules'
+		// activate only in: admin | WP_CLI | DOING_CRON
 		if( $rg->auto_activate && ( is_admin() || defined( 'WP_CLI' ) || defined( 'DOING_CRON' ) ) ){
 			self::activate( $this->id );
 		}
 
-		foreach( $rg->events as $hook => $data ){
-			add_action( $hook, $data['callback'] );
+		// add cron hooks
+		foreach( $rg->events as $hook_name => $task_data ){
+			add_action( $hook_name, $task_data['callback'], 10, count( $task_data['args'] ) );
 		}
 
-		if( self::DEBUG && defined( 'DOING_CRON' ) ){
-
-			add_action( 'wp_loaded', function(){
-
-				echo 'Current time: ' . time() . "\n\n\n" . 'Existing Intervals:' . "\n" .
-				     print_r( wp_get_schedules(), 1 ) . "\n\n\n" . print_r( _get_cron_array(), 1 );
-			} );
-		}
+		self::debug_info();
 	}
 
 	public function add_intervals( $schedules ){
@@ -218,7 +214,7 @@ class Kama_Cron {
 	 *
 	 * @param string $id
 	 */
-	static function activate( $id = '' ){
+	private static function activate( $id = '' ){
 
 		$opts = $id ? [ $id => self::$opts[ $id ] ] : self::$opts;
 
@@ -251,7 +247,7 @@ class Kama_Cron {
 	 *
 	 * @param string $id
 	 */
-	static function deactivate( $id = '' ){
+	public static function deactivate( $id = '' ){
 
 		$opts = $id ? [ $id => self::$opts[ $id ] ] : self::$opts;
 
@@ -263,11 +259,25 @@ class Kama_Cron {
 		}
 	}
 
-	static function default_callback(){
+	public static function default_callback(){
 
 		echo "ERROR: One of Kama_Cron callback function not set.\n\nKama_Cron::\$opts = " .
 		     print_r( self::$opts, 1 ) . "\n\n\n\n_get_cron_array() =" .
 		     print_r( _get_cron_array(), 1 );
+	}
+
+	private static function debug_info(): void {
+
+		if( ! ( self::DEBUG && defined( 'DOING_CRON' ) ) ){
+			return;
+		}
+
+		add_action( 'wp_loaded', function() {
+
+			echo sprintf( "Current time: %s\n\n\nExisting Intervals:\n%s\n\n\n%s",
+				time(), print_r( wp_get_schedules(), 1 ), print_r( _get_cron_array(), 1 )
+			);
+		} );
 	}
 
 }
