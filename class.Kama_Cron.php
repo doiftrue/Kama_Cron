@@ -51,7 +51,7 @@
  *
  * @author Kama (wp-kama.com)
  *
- * @version 1.0
+ * @version 1.1
  */
 class Kama_Cron {
 
@@ -192,7 +192,8 @@ class Kama_Cron {
 
 	/**
 	 * Add cron task.
-	 * Should be called on plugin activation. Can be called somewhere else, for example, when updating the settings.
+	 * Should be called on plugin activation.
+	 * Can be called somewhere else, for example, when updating the settings.
 	 *
 	 * @param string $id
 	 */
@@ -238,7 +239,7 @@ class Kama_Cron {
 			// allow set only `interval_name` parameter like: 10_min, 2_hours, 5_days, 2_month
 			if( ! $data['interval_sec'] ){
 
-				if( preg_match( '/(\d+)[_-](min|hour|day|month)s?/', $interval_name, $mm ) ){
+				if( preg_match( '/^(\d+)[_-](min|hour|day|month)s?/', $interval_name, $mm ) ){
 					$min = 60;
 					$hour = $min * 60;
 					$day = $hour * 24;
@@ -248,7 +249,7 @@ class Kama_Cron {
 				}
 				else {
 					/** @noinspection ForgottenDebugOutputInspection */
-					wp_die( 'ERROR: Kama_Cron required event parameter `interval_sec` not set. ' . print_r( debug_backtrace(), 1 ) );
+					wp_die( 'ERROR: Kama_Cron required `interval_sec` parameter not set. ' . print_r( debug_backtrace(), 1 ) );
 				}
 			}
 
@@ -263,7 +264,7 @@ class Kama_Cron {
 
 	public static function default_callback(){
 
-		echo "ERROR: One of Kama_Cron callback function not set.\n\nKama_Cron::\$opts = " .
+		echo "ERROR: One of Kama_Cron callback function not set.\n\nKama_Cron::\$instance = " .
 		     print_r( self::$instances, 1 ) . "\n\n\n\n_get_cron_array() =" .
 		     print_r( _get_cron_array(), 1 );
 	}
@@ -283,4 +284,3 @@ class Kama_Cron {
 	}
 
 }
-
