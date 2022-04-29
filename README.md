@@ -1,8 +1,7 @@
-# Kama_Cron
-Класс для удобного добавления крон событий в WordPress
+A small class for easily adding WP Cron tasks (jobs).
 
-Класс позволяет удобно создавать задачи крон, чтобы не перепутать ничего, все настройки указываются в параметре при вызове класса, остальную рутину выполняет класс. Функции-обработчики задач нужно писать отдельно!
+This Class allow you to create WordPress Cron tasks in a quick and simple way. In order not to confuse anything, all settings are specified in the first parameter when calling the class. The class takes care of the entire routine of correctly registering the Cron task and their intervals. The task handler (the function) need to be written separately in PHP!
 
-## Примеры использования класса Kama_Cron
+## Examples of using the Kama_Cron class
 
-Смотрите в [оригинальной статье](https://wp-kama.ru/id_11098/kama_cron.html) на сайте wp-kama.ru.
+See here https://wp-kama.com/1353/kama_cron
