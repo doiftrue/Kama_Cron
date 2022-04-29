@@ -1,3 +1,6 @@
+1.1 (2022-04-28)
+- Refactor & bug fixes.
+
 0.4.6
 - Single event registration support.
 - Passing arguments simplified method.
