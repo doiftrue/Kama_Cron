@@ -8,21 +8,21 @@ namespace Kama\WP;
  * Usage Example:
  *
  * ```
- * new Kama_Cron( [
+ * new \Kama\WP\Kama_Cron( [
  *     'wpkama_cron_func' => [
  *         'callback'      => 'wpkama_cron_func', // PHP function to run on job
  *         'interval_name' => '10 min',           // you can set already registered interval: hourly, twicedaily, daily
  *     ],
  * ] );
  *
- * new Kama_Cron( [
+ * new \Kama\WP\Kama_Cron( [
  *     'single_job' => [
  *         'callback' => 'single_job_func',
  *         'start_time' => strtotime( '2021-06-05' ),
  *     ],
  * ] );
  *
- * new Kama_Cron( [
+ * new \Kama\WP\Kama_Cron( [
  *     'id'     => 'my_cron_jobs', // not required param
  *     'events' => [
  *         // first task

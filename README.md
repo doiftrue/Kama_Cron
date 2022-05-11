@@ -7,7 +7,7 @@ This Class allow you to create WordPress Cron tasks in a quick and simple way. I
 
 ```php
 new \Kama\WP\Kama_Cron( [
-    'wpkama_cron_func' => [
+    'cron_event_name' => [
         'callback'      => 'wpkama_cron_func', // PHP function to run on job
         'interval_name' => '10 min',           // you can set already registered interval: hourly, twicedaily, daily
     ],
@@ -18,7 +18,7 @@ new \Kama\WP\Kama_Cron( [
 new \Kama\WP\Kama_Cron( [
     'single_job' => [
         'callback' => 'single_job_func',
-        'start_time' => strtotime( '2021-06-05' ),
+        'start_time' => strtotime( '2025-06-05' ),
     ],
 ] );
 ```
