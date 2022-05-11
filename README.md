@@ -9,8 +9,7 @@ This Class allow you to create WordPress Cron tasks in a quick and simple way. I
 new \Kama\WP\Kama_Cron( [
     'wpkama_cron_func' => [
         'callback'      => 'wpkama_cron_func', // PHP function to run on job
-        'interval_name' => '10_min',           // you can set already registered interval: hourly, twicedaily, daily
-        'interval_desc' => 'Every 10 min',     // no need if already registered interval is set.
+        'interval_name' => '10 min',           // you can set already registered interval: hourly, twicedaily, daily
     ],
 ] );
 ```
@@ -31,21 +30,18 @@ new \Kama\WP\Kama_Cron( [
         // first task
         'wpkama_cron_func' => [
             'callback'      => 'wpkama_cron_func', // PHP function to run on job
-            'interval_name' => '10_min',           // you can set already registered interval: hourly, twicedaily, daily
-            'interval_desc' => 'Every 10 min',     // no need if already registered interval is set.
+            'interval_name' => '10 min',           // or WP interval: hourly, twicedaily, daily
         ],
         // second task
         'wpkama_cron_func_2' => [
             'callback'      => 'wpkama_cron_func_2',
+            'interval_name' => '2 hours',
             'start_time'    => time() + DAY_IN_SECONDS, // start in 1 day
-            'interval_name' => 'two_hours',
-            'interval_sec'  => HOUR_IN_SECONDS 2,
-            'interval_desc' => 'Every 2 hours',
         ],
         // third task
         'wpkama_cron_func_3' => [
             'callback'      => 'wpkama_cron_func_3',
-            'interval_name' => 'hourly', // this is already a known WP interval
+            'interval_name' => 'hourly', // WP interval
         ],
     ],
 ] );
