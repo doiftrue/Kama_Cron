@@ -1,5 +1,7 @@
 <?php
 
+namespace Kama\WP;
+
 /**
  * Convenient way to add cron tasks in WordPress.
  *
@@ -51,7 +53,7 @@
  *
  * @author Kama (wp-kama.com)
  *
- * @version 1.1
+ * @version 1.2
  */
 class Kama_Cron {
 

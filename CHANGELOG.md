@@ -1,3 +1,6 @@
+1.2 (2022-05-11)
+- publish to packagist.org.
+
 1.1 (2022-04-28)
 - Refactor & bug fixes.
 
