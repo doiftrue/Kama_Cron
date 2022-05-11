@@ -11,8 +11,7 @@ namespace Kama\WP;
  * new Kama_Cron( [
  *     'wpkama_cron_func' => [
  *         'callback'      => 'wpkama_cron_func', // PHP function to run on job
- *         'interval_name' => '10_min',           // you can set already registered interval: hourly, twicedaily, daily
- *         'interval_desc' => 'Every 10 min',     // no need if already registered interval is set.
+ *         'interval_name' => '10 min',           // you can set already registered interval: hourly, twicedaily, daily
  *     ],
  * ] );
  *
@@ -29,16 +28,13 @@ namespace Kama\WP;
  *         // first task
  *         'wpkama_cron_func' => [
  *             'callback'      => 'wpkama_cron_func', // PHP function to run on job
- *             'interval_name' => '10_min',           // you can set already registered interval: hourly, twicedaily, daily
- *             'interval_desc' => 'Every 10 min',     // no need if already registered interval is set.
+ *             'interval_name' => '10 minutes',       // you can set already registered interval: hourly, twicedaily, daily
  *         ],
  *         // second task
  *         'wpkama_cron_func_2' => [
  *             'callback'      => 'wpkama_cron_func_2',
+ *             'interval_name' => '2 hours',
  *             'start_time'    => time() + DAY_IN_SECONDS, // start in 1 day
- *             'interval_name' => 'two_hours',
- *             'interval_sec'  => HOUR_IN_SECONDS * 2,
- *             'interval_desc' => 'Every 2 hours',
  *         ],
  *         // third task
  *         'wpkama_cron_func_3' => [
@@ -53,7 +49,7 @@ namespace Kama\WP;
  *
  * @author Kama (wp-kama.com)
  *
- * @version 1.2
+ * @version 1.3
  */
 class Kama_Cron {
 
@@ -241,8 +237,8 @@ class Kama_Cron {
 			// allow set only `interval_name` parameter like: 10_min, 2_hours, 5_days, 2_month
 			if( ! $data['interval_sec'] ){
 
-				if( preg_match( '/^(\d+)[_-](min|hour|day|month)s?/', $interval_name, $mm ) ){
-					$min = 60;
+				if( preg_match( '/^(\d+)[ _-](min(?:ute)?|hour|day|month)s?/', $interval_name, $mm ) ){
+					$min = $minute = 60;
 					$hour = $min * 60;
 					$day = $hour * 24;
 					$month = $day * 30;

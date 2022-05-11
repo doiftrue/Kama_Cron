@@ -1,3 +1,6 @@
+1.3 (2022-05-11)
+- 'interval_name' argument now accepts human-readable variants: `10 minutes`, `5 hours`, `5 days`, `1 month`, `1 months`. This string will automaticcaly parsed to 'interval_sec' argument.
+
 1.2 (2022-05-11)
 - publish to packagist.org.
 
