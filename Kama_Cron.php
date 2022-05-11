@@ -120,17 +120,16 @@ class Kama_Cron {
 	 *        @type mixed     $args           What parameters should be passed to the cron task function.
 	 *        @type string    $interval_name  The name of the interval, for example: 'half_an_hover'.
 	 *                                        You can specify the name in the following format:
-	 *                                        `N_(min|hour|day|month)` — 10_min, 2_hours, 5_days, 2_month,
-	 *                                        then the number will be taken as interval time.
-	 *                                        You can specify an existing WP interval: hourly, twicedaily, daily,
-	 *                                        then the interval time should not be set.
+	 *                                        `N (min|hour|day|month)s` — 10 minutes, 2 hours, 5 days, 2 months,
+	 *                                        then the number will be taken to 'interval_sec' parameter.
+	 *                                        You can specify an existing WP interval: hourly, twicedaily, daily.
 	 *                                        Omite this parameter to register single cron job.
 	 *        @type int       $interval_sec   Interval time, for example HOUR_IN_SECONDS / 2.
 	 *                                        You don't need to specify this papameter when $interval_name one of:
-	 *                                        N_(min|hour|day|month), hourly, twicedaily, daily.
+	 *                                        N (min|hour|day|month)s, hourly, twicedaily, daily.
 	 *        @type string    $interval_desc  Description of the interval, for example, 'Every half hour'.
 	 *                                        You don't need to specify this param when $interval_name one of:
-	 *                                        hourly, twicedaily, daily.
+	 *                                        N (min|hour|day|month)s, hourly, twicedaily, daily.
 	 *        @type int       $start_time     UNIX timestamp. When to start the event. Default: time().
 	 *     }
 	 *
