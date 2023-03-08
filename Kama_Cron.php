@@ -34,7 +34,7 @@ namespace Kama\WP;
  *         'wpkama_cron_func_2' => [
  *             'callback'      => 'wpkama_cron_func_2',
  *             'interval_name' => '2 hours',
- *             'start_time'    => time() + DAY_IN_SECONDS, // start in 1 day
+ *             'start_time'    => strtotime('tomorrow 6am'), // start tomorrow at 6:00 a.m. (will trigger the site time)
  *         ],
  *         // third task
  *         'wpkama_cron_func_3' => [
