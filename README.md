@@ -5,6 +5,7 @@ This Class allow you to create WordPress Cron tasks in a quick and simple way. I
 
 ## Examples of using the Kama_Cron class
 
+Repeatable job:
 ```php
 new \Kama\WP\Kama_Cron( [
     'cron_event_name' => [
@@ -14,18 +15,20 @@ new \Kama\WP\Kama_Cron( [
 ] );
 ```
 
+Single job:
 ```php
 new \Kama\WP\Kama_Cron( [
     'single_job' => [
         'callback' => 'single_job_func',
-        'start_time' => strtotime( '2025-06-05' ),
+        'start_time' => strtotime( 'tomorrow 6am' ),
     ],
 ] );
 ```
 
+Register manu jobs at once:
 ```php
 new \Kama\WP\Kama_Cron( [
-    'id'     => 'my_cron_jobs', // not required param
+    'id' => 'my_cron_jobs', // not required param
     'events' => [
         // first task
         'wpkama_cron_func' => [
