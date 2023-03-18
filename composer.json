@@ -2,7 +2,7 @@
     "name": "doiftrue/wp-kama-cron",
     "description": "A small class for easily adding WP Cron tasks (jobs).",
     "keywords": [ "wordpress" ],
-    "homepage": "https://wp-kama.com/1353/kama_cron",
+    "homepage": "https://wp-kama.com/1353",
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -11,13 +11,14 @@
             "homepage": "https://wp-kama.com"
         }
     ],
-    "require": {
-        "php": ">=7.1.0"
-    },
-    "require-dev": {},
     "autoload": {
         "psr-4": {
             "Kama\\WP\\": ""
+        }
+    },
+    "config": {
+        "platform": {
+            "php": ">=7.1"
         }
     }
 }

@@ -5,9 +5,11 @@ namespace Kama\WP;
 /**
  * Convenient way to add cron tasks in WordPress.
  *
+ * INFO: For debugging go to: http://site.com/wp-cron.php
+ *
  * Usage Example:
  *
- * ```
+ * ```php
  * new \Kama\WP\Kama_Cron( [
  *     'wpkama_cron_func' => [
  *         'callback'      => 'wpkama_cron_func', // PHP function to run on job
@@ -34,7 +36,7 @@ namespace Kama\WP;
  *         'wpkama_cron_func_2' => [
  *             'callback'      => 'wpkama_cron_func_2',
  *             'interval_name' => '2 hours',
- *             'start_time'    => strtotime('tomorrow 6am'), // start tomorrow at 6:00 a.m. (will trigger the site time)
+ *             'start_time'    => strtotime('tomorrow 6am'), // start tomorrow at 6:00am + site gtm_offset
  *         ],
  *         // third task
  *         'wpkama_cron_func_3' => [
@@ -49,7 +51,7 @@ namespace Kama\WP;
  *
  * @author Kama (wp-kama.com)
  *
- * @version 1.3
+ * @version 1.4
  */
 class Kama_Cron {
 
@@ -75,32 +77,26 @@ class Kama_Cron {
 	];
 
 	/**
-	 * Collects every cron options called with this class.
-	 * It may be useful for any external cases.
+	 * Current instance args.
 	 *
 	 * @var array
 	 */
-	public static $instances = [];
+	protected $args = [];
 
 	/**
-	 * Must be 0 on production.
-	 * For debugging go to: http://site.com/wp-cron.php
+	 * Container for every instance.
+	 * To have acces to instance use `Kama_Cron::get()` method.
+	 *
+	 * @var array
 	 */
-	public const DEBUG = false;
+	protected static $instances = [];
 
 	/**
 	 * ID cron args. Internal - not uses for cron.
 	 *
 	 * @var string
 	 */
-	protected $id;
-
-	/**
-	 * Current instance args.
-	 *
-	 * @var array
-	 */
-	protected $args;
+	protected $id = '';
 
 	/**
 	 * Constructor.
@@ -130,57 +126,74 @@ class Kama_Cron {
 	 *        @type string    $interval_desc  Description of the interval, for example, 'Every half hour'.
 	 *                                        You don't need to specify this param when $interval_name one of:
 	 *                                        N (min|hour|day|month)s, hourly, twicedaily, daily.
-	 *        @type int       $start_time     UNIX timestamp. When to start the event. Default: time().
+	 *        @type int       $start_time     UNIX timestamp. When to start the event. Default: time(). If you need to start event
+	 *                                        at, for example, tomorrow 6 AM (with site time), you must get timestamp and fix
+	 *                                        it with site gtm_offset: `strtotime('tomorrow 6am') - (int) get_option('gtm_offset')`.
 	 *     }
 	 *
 	 * }
 	 */
 	public function __construct( array $args ){
 
-		// if passed simple array of events
-		if( empty( $args['events'] ) ){
+		$this->set_args( $args );
+		$this->init();
+
+		self::$instances[ $this->args['id'] ] = $this;
+	}
+
+	/**
+	 * Gets instance by id.
+	 */
+	public static function get( string $instance_id ): self {
+
+		return self::$instances[ $instance_id ] ?? new self( [ 'id' => 'stub', 'events' => [] ] );
+	}
+
+	protected function set_args( array $args ): void {
+
+		// if direct events data passed
+		if( ! isset( $args['events'] ) ){
 			$args = [ 'events' => $args ];
 		}
 
-		// complete passed args using defaults
+		// add default values to $args
 		$args += [
 			'id' => implode( '|', array_keys( $args['events'] ) ),
-			'auto_activate' => true,
+			'auto_activate' => self::$default_args['auto_activate'],
 		];
 
-		// complete each passed 'event' using defaults
+		// add default values to each "event"
 		foreach( $args['events'] as $indx => $_event ){
 			$args['events'][ $indx ] += self::$default_args['events']['hook_name'];
 		}
 
 		$this->args = $args;
+	}
 
-		self::$instances[ $this->args['id'] ] = $this;
+	protected function init(): void {
 
-		// after self::$opts
-		add_filter( 'cron_schedules', [ $this, '_add_intervals' ] );
-
-		// after 'cron_schedules'
-		// activate only in: admin | WP_CLI | DOING_CRON
-		if( $args['auto_activate'] && ( is_admin() || defined( 'WP_CLI' ) || defined( 'DOING_CRON' ) ) ){
-			$this->activate();
+		if( ! $this->args['events'] ){
+			return;
 		}
 
+		add_filter( 'cron_schedules', [ $this, 'add_intervals_callback' ] );
+
 		// add cron hooks
-		foreach( $args['events'] as $hook_name => $task_data ){
+		foreach( $this->args['events'] as $hook_name => $task_data ){
 			add_action( $hook_name, $task_data['callback'], 10, count( $task_data['args'] ) );
 		}
 
-		self::debug_info();
+		// after 'cron_schedules'
+		if( $this->args['auto_activate'] && ( is_admin() || defined( 'WP_CLI' ) || defined( 'DOING_CRON' ) ) ){
+			$this->activate();
+		}
 	}
 
 	/**
-	 * Removes cron task.
+	 * Removes all cron tasks of current instance.
 	 * Should be called on plugin deactivation.
-	 *
-	 * @param string $id
 	 */
-	public function deactivate(){
+	public function deactivate(): void {
 
 		foreach( $this->args['events'] as $hook => $data ){
 			wp_clear_scheduled_hook( $hook, $data['args'] );
@@ -188,13 +201,11 @@ class Kama_Cron {
 	}
 
 	/**
-	 * Add cron task.
+	 * Add all cron tasks of current instance.
 	 * Should be called on plugin activation.
 	 * Can be called somewhere else, for example, when updating the settings.
-	 *
-	 * @param string $id
 	 */
-	private function activate(){
+	public function activate(): void {
 
 		foreach( $this->args['events'] as $hook => $data ){
 
@@ -203,20 +214,27 @@ class Kama_Cron {
 			}
 
 			if( $data['interval_name'] ){
-				wp_schedule_event( $data['start_time'] ?: time(), $data['interval_name'], $hook, $data['args'] );
+				$wp_error = wp_schedule_event( $data['start_time'] ?: time(), $data['interval_name'], $hook, $data['args'], true );
 			}
 			// single event
 			elseif( ! $data['start_time'] ){
-				trigger_error( __CLASS__ . ' ERROR: Start time not specified for single event' );
+				$msg = "ERROR: nor `interval_name` OR `start_time` was not set for the Kama Cron event `$hook`.";
+				_doing_it_wrong( __METHOD__, $msg, '' );
 			}
 			elseif( $data['start_time'] > time() ){
-				wp_schedule_single_event( $data['start_time'], $hook, $data['args'] );
+				$wp_error = wp_schedule_single_event( $data['start_time'], $hook, $data['args'], true );
 			}
 
+			if ( is_wp_error( $wp_error ?? null ) ) {
+				trigger_error( __METHOD__ . ': ' . $wp_error->get_error_message() );
+			}
 		}
 	}
 
-	public function _add_intervals( $schedules ){
+	/**
+	 * @private
+	 */
+	public function add_intervals_callback( $schedules ){
 
 		foreach( $this->args['events'] as $data ){
 
@@ -245,8 +263,10 @@ class Kama_Cron {
 					$data['interval_sec'] = $mm[1] * ${ $mm[2] };
 				}
 				else {
+					echo 'ERROR: Kama_Cron required `interval_sec` parameter not set.';
 					/** @noinspection ForgottenDebugOutputInspection */
-					wp_die( 'ERROR: Kama_Cron required `interval_sec` parameter not set. ' . print_r( debug_backtrace(), 1 ) );
+					echo "\n\n". debug_print_backtrace();
+					die();
 				}
 			}
 
@@ -259,25 +279,11 @@ class Kama_Cron {
 		return $schedules;
 	}
 
-	public static function default_callback(){
+	public static function default_callback(): void {
 
-		echo "ERROR: One of Kama_Cron callback function not set.\n\nKama_Cron::\$instance = " .
-		     print_r( self::$instances, 1 ) . "\n\n\n\n_get_cron_array() =" .
-		     print_r( _get_cron_array(), 1 );
-	}
-
-	private static function debug_info(): void {
-
-		if( ! ( self::DEBUG && defined( 'DOING_CRON' ) ) ){
-			return;
-		}
-
-		add_action( 'wp_loaded', function() {
-
-			echo sprintf( "Current time: %s\n\n\nExisting Intervals:\n%s\n\n\n%s",
-				time(), print_r( wp_get_schedules(), 1 ), print_r( _get_cron_array(), 1 )
-			);
-		} );
+		echo 'ERROR: One of Kama_Cron callback function not set.';
+		echo "\n\nKama_Cron::\$instance = " . print_r( self::$instances, true );
+		echo "\n\n\n\n_get_cron_array() =" . print_r( _get_cron_array(), true );
 	}
 
 }

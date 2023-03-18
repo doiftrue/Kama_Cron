@@ -1,0 +1,42 @@
+# https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# any file
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = tab
+indent_size = 4
+tab_width = 4
+trim_trailing_whitespace = true
+insert_final_newline = true
+ij_smart_tabs = true
+ij_formatter_off_tag = @formatter:off
+ij_formatter_on_tag = @formatter:on
+ij_formatter_tags_enabled = true
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.php]
+# Difference with WPCS
+ij_php_align_assignments = false                # `$f   = 5[\n]$foo = 5` >>> `$f = 5[\n]$fooo = 5`
+ij_php_else_on_new_line = true                  # `if(){} else {}` >>> `if(){}[\n]else {}`
+ij_php_catch_on_new_line = true                 # `try(){} catch {}` >>> `try(){}[\n]catch{}`
+ij_php_finally_on_new_line = true               # `try(){} finally {}` >>> `try(){}[\n]finally{}`
+ij_php_space_before_else_left_brace = false     # `if(){}[\n]else {}` >>> `if(){}[\n]else{}`
+ij_php_space_before_for_left_brace = false      # `for() {` >>> `for(){`
+ij_php_space_before_for_parentheses = false     # `for (){` >>> `for(){`
+ij_php_space_before_if_left_brace = false       # `if() {` >>> `if(){`
+ij_php_space_before_if_parentheses = false      # `if (){` >>> `if(){`
+ij_php_space_before_while_left_brace = false    # `while() {` >>> `while(){`
+ij_php_space_before_while_parentheses = false   # `while (){` >>> `while(){`
+ij_php_space_before_switch_left_brace = false   # `switch() {` >>> `switch(){`
+ij_php_space_before_switch_parentheses = false  # `switch (){` >>> `switch(){`
+ij_php_spaces_around_unary_operator = false     # `++ $foo` >>> `++$foo`
+
+[{*.yml,*.json}]
+indent_style = space
+indent_size = 2
