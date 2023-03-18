@@ -6,20 +6,16 @@ This Class allow you to create WordPress Cron tasks in a quick and simple way. I
 Examples
 --------
 
+> By default, the tasks are registered automatically (it works very fast) when you visit the admin panel OR at WP_CLI request OR at any cron request. If automatic registration is not needed, specify parameter ``auto_activate' => false`` and activate tasks manually using method ``activate()``. See the example below.
+
 > INFO: You can call ``Kama_Cron`` at the earliest stage of loading WP, starting from the earliest `muplugins_loaded` hook.
 
 > IMPORTANT: The ``Kama_Cron'' code should also work in cron requests, because it registers the necessary WP hooks that will be executed during cron requests. In other words, you CANNOT register a cron job with this code and delete it.
 
-Простое использование без дополнительных параметров
-
-В этом примере указанная задача Cron будет зарегистрирована автоматически при посещении админ-панели или при любому Cron запросе.
-
-``wpkama_cron_hook`` - это внутреннее имя хука WP, вам не нужно использовать его где-либо в своем коде - просто укажите понятное и уникальное имя.
-
 
 ### Repeatable job
 
-##### Use the known WP interval (hourly):
+#### Use the known WP interval (hourly):
 
 ```php
 new \Kama\WP\Kama_Cron( [
@@ -34,7 +30,9 @@ function wpkama_core_data_check_update(){
 }
 ```
 
-##### Use the unknown WP interval (10 minutes):
+``wpkama_core_data_check_update`` - it's an internal name of WP hook you don't need to use it anywhere in your code - just specify unique understandable name (it may be good idea to name it as callback function name).
+
+#### Use the unknown WP interval (10 minutes):
 
 ```php
 new \Kama\WP\Kama_Cron( [
@@ -57,7 +55,7 @@ function wpkama_cron_func(){
 
 ### Single job
 
-##### Single job (once):
+#### Single job (once):
 
 ```php
 new \Kama\WP\Kama_Cron( [
@@ -68,7 +66,7 @@ new \Kama\WP\Kama_Cron( [
 ] );
 ```
 
-##### Repeatable Single job (once at time):
+#### Repeatable Single job (once at time):
 
 ```php
 new \Kama\WP\Kama_Cron( [
@@ -147,7 +145,7 @@ The code below shows how to activate and deactivate tasks customly - when activa
 IMPORTANT: in this case the parameter auto_activate must be false: `'auto_activate' => false`!
 
 ```php
-// Пример активации и деактивации, если не указан параметр auto_activate
+// Example of activation and deactivation when the `auto_activate = false`
 register_activation_hook( __FILE__, function(){
 	\Kama\WP\Kama_Cron::get( 'my_cron_jobs_2' )->activate();
 } );
