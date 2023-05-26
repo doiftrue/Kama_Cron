@@ -51,6 +51,7 @@ namespace Kama\WP;
  *
  * @author Kama (wp-kama.com)
  *
+ * @requires-php 7.1
  * @version 1.4
  */
 class Kama_Cron {

@@ -1,6 +1,14 @@
-A small class for easily adding WP Cron tasks (jobs).
+A small class for easy adding WP Cron tasks (jobs).
 
-This Class allow you to create WordPress Cron tasks in a quick and simple way. In order not to confuse anything, all settings are specified in the first parameter when calling the class. The class takes care of the entire routine of correctly registering the Cron task and their intervals. The task handler (the function) need to be written separately in PHP!
+This Class allow you to create WordPress Cron tasks in a quick and simple way. In order not to confuse anything, all tasks settings are specified in the first parameter when crating the class instance. The class takes care of all the routine for proper registration of Cron tasks and their intervals. The task handler (callback function) must already exist in PHP or need to be written separately!
+
+
+Requirements
+------------
+
+- PHP: >=7.1
+- WordPress: >=5.0 
+
 
 
 Examples
@@ -25,12 +33,15 @@ new \Kama\WP\Kama_Cron( [
 	]
 ] );
 
+/**
+ * Cron callback (handler) function.
+ */
 function wpkama_core_data_check_update(){
 	// your code to do the cron job
 }
 ```
 
-``wpkama_core_data_check_update`` - it's an internal name of WP hook you don't need to use it anywhere in your code - just specify unique understandable name (it may be good idea to name it as callback function name).
+``wpkama_core_data_check_update`` - it's an internal name of WP hook you don't need to use it anywhere in your code - just specify unique understandable name (I think it's a good idea to name it same as callback function).
 
 #### Use the unknown WP interval (10 minutes):
 
