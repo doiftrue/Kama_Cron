@@ -47,12 +47,12 @@ namespace Kama\WP;
  * ] );
  * ```
  *
- * @changelog: https://github.com/doiftrue/Kama_Cron/blob/master/changelog.md
+ * @changelog: https://github.com/doiftrue/Kama_Cron/blob/master/CHANGELOG.md
  *
  * @author Kama (wp-kama.com)
  *
- * @requires-php 7.1
- * @version 1.4
+ * @requires-php 7.4
+ * @version 1.4.1
  */
 class Kama_Cron {
 
